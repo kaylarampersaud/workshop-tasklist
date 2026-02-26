@@ -14,17 +14,16 @@ import requireUser from "#middleware/requireUser";
 
 router.use(requireUser);
 
-router
-  .route("/")
-  .get(async (req, res) => {
-    const tasks = await getTasksByUserId(req.user.id);
-    res.send(tasks);
-  })
-  .post(requireBody(["title", "done"]), async (req, res) => {
-    const { title, done } = req.body;
-    const task = await createTask(title, done, req.user.id);
-    res.status(201).send(task);
-  });
+router.get("/", async (req, res) => {
+  const tasks = await getTasksByUserId(req.user.id);
+  res.send(tasks);
+});
+
+router.post("/", requireBody(["title", "done"]), async (req, res) => {
+  const { title, done } = req.body;
+  const task = await createTask(title, done, req.user.id);
+  res.status(201).send(task);
+});
 
 router.param("id", async (req, res, next, id) => {
   const task = await getTaskById(id);
@@ -37,14 +36,13 @@ router.param("id", async (req, res, next, id) => {
   next();
 });
 
-router
-  .route("/:id")
-  .delete(async (req, res) => {
-    await deleteTaskById(req.task.id);
-    res.sendStatus(204);
-  })
-  .put(requireBody(["title", "done"]), async (req, res) => {
-    const { title, done } = req.body;
-    const task = await updateTaskById(req.task.id, title, done);
-    res.send(task);
-  });
+router.delete("/:id", async (req, res) => {
+  await deleteTaskById(req.task.id);
+  res.sendStatus(204);
+});
+
+router.put("/:id", requireBody(["title", "done"]), async (req, res) => {
+  const { title, done } = req.body;
+  const task = await updateTaskById(req.task.id, title, done);
+  res.send(task);
+});
